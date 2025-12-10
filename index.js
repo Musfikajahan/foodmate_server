@@ -117,3 +117,41 @@ app.delete('/orders/:id', async (req, res) => {
     const result = await ordersCollection.deleteOne({ _id: new ObjectId(id) });
     res.send(result);
 });
+ // Save payment info
+ app.post('/payments', async (req, res) => {
+    const payment = req.body;
+
+
+    // Update order status to 'paid'
+    await ordersCollection.updateOne(
+        { _id: new ObjectId(payment.orderId) },
+        { $set: { orderStatus: "paid" } }
+    );
+
+
+    const result = await paymentsCollection.insertOne(payment);
+    res.send({ paymentResult: result });
+});
+
+
+// --- Get payments by user email ---
+app.get('/payments/:email', async (req, res) => {
+    const email = req.params.email;
+    try {
+        const payments = await paymentsCollection.find({ email }).sort({ date: -1 }).toArray();
+        res.send(payments);
+    } catch (err) {
+        res.status(500).send({ error: "Failed to fetch payments" });
+    }
+});
+
+
+await client.db("admin").command({ ping: 1 });
+console.log("MongoDB connected!");
+} finally {
+// Keep connection open
+}
+}
+
+
+run().catch(console.dir);
