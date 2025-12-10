@@ -28,3 +28,16 @@ async function run() {
         const paymentsCollection = db.collection("payments");
 
 
+ // --- Admin creation ---
+ app.get('/create-admins', async (req, res) => {
+    const admins = [
+        { name: "Admin One", email: "admin1@example.com", role: "admin" },
+        { name: "Admin Two", email: "admin2@example.com", role: "admin" }
+    ];
+    const results = [];
+    for (const admin of admins) {
+        const exists = await usersCollection.findOne({ email: admin.email });
+        if (!exists) results.push(await usersCollection.insertOne(admin));
+    }
+    res.send({ message: "Admins created if not exist", results });
+});
