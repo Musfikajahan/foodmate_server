@@ -41,3 +41,11 @@ async function run() {
     }
     res.send({ message: "Admins created if not exist", results });
 });
+ // --- Users ---
+ app.post('/users', async (req, res) => {
+    const user = req.body;
+    const exists = await usersCollection.findOne({ email: user.email });
+    if (exists) return res.send({ message: 'User exists', insertedId: null });
+    const result = await usersCollection.insertOne(user);
+    res.send(result);
+});
