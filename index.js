@@ -49,3 +49,10 @@ async function run() {
     const result = await usersCollection.insertOne(user);
     res.send(result);
 });
+  // --- Check if user is admin ---
+  app.get('/users/admin/:email', async (req, res) => {
+    const email = req.params.email;
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).send({ error: "User not found" });
+    res.send({ isAdmin: user.role === "admin" });
+});
