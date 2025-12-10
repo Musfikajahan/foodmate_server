@@ -56,3 +56,64 @@ async function run() {
     if (!user) return res.status(404).send({ error: "User not found" });
     res.send({ isAdmin: user.role === "admin" });
 });
+ // --- Orders ---
+ app.post('/orders', async (req, res) => {
+    const order = req.body;
+    order.orderTime = new Date();
+    order.orderStatus = "pending";
+    const result = await ordersCollection.insertOne(order);
+    res.send(result);
+});
+
+
+app.get('/orders', async (req, res) => {
+    const email = req.query.email;
+    const orders = await ordersCollection.find({ userEmail: email }).toArray();
+    res.send(orders);
+});
+
+
+app.get('/orders/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const order = await ordersCollection.findOne({ _id: new ObjectId(id) });
+        if (!order) return res.status(404).send({ error: "Order not found" });
+        res.send(order);
+    } catch (error) {
+        res.status(500).send({ error: "Failed to fetch order" });
+    }
+});
+
+
+app.get('/orders/chef/:email', async (req, res) => {
+    const email = req.params.email;
+    const orders = await ordersCollection.find({ chefEmail: email }).sort({ orderTime: -1 }).toArray();
+    res.send(orders);
+});
+
+
+app.patch('/orders/status/:id', async (req, res) => {
+    const id = req.params.id;
+    const { status } = req.body;
+    const order = await ordersCollection.findOne({ _id: new ObjectId(id) });
+    if (!order) return res.status(404).send({ error: "Order not found" });
+
+
+    if (order.orderStatus === "paid" || order.orderStatus === "cancelled") {
+        return res.status(400).send({ error: "Cannot change status of paid or cancelled order" });
+    }
+
+
+    const result = await ordersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { orderStatus: status } }
+    );
+    res.send(result);
+});
+
+
+app.delete('/orders/:id', async (req, res) => {
+    const id = req.params.id;
+    const result = await ordersCollection.deleteOne({ _id: new ObjectId(id) });
+    res.send(result);
+});
