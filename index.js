@@ -215,7 +215,7 @@ app.patch('/orders/status/:id', async (req, res) => {
     res.send(result);
 });
 
-// --- PAYMENTS & STRIPE ---
+
 app.post('/create-payment-intent', async (req, res) => {
     const { price } = req.body;
     const amount = parseInt(price * 100); 
@@ -251,17 +251,14 @@ app.get('/payments/:email', async (req, res) => {
     res.send(payments);
 });
 
-// Root route (just to check if server is running)
 app.get('/', (req, res) => {
     res.send("FoodChef Server is Running!");
 });
 
-// Only listen if not running on Vercel (Vercel handles listening automatically)
 if (process.env.NODE_ENV !== 'production') {
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`);
     });
 }
 
-// REQUIRED for Vercel
 module.exports = app;
