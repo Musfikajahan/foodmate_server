@@ -35,7 +35,7 @@ const client = new MongoClient(uri, {
 // This ensures we connect to the DB before handling any request
 app.use(async (req, res, next) => {
     try {
-        await client.connect();
+        // await client.connect();
         req.db = client.db("foodchefDB");
         next();
     } catch (error) {
